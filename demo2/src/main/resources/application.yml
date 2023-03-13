@@ -1,0 +1,12 @@
+server:
+  port: 8081
+
+
+spring:
+  beaninfo:
+    ignore: false
+
+#logging:
+logging:
+  config: classpath:logback.xml
+#  config: /apps/config/logconfig/seller-logback.xml

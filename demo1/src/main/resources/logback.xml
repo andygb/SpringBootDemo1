@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="true" scan="true" scanPeriod="5 minutes">
+
+    <!-- property 标签定义一些可在 当前 xml 中使用的变量 -->
+
+    <!-- your application name -->
+    <property name="MODULE" value="demo1" />
+
+    <property scope="system" name="nodeId" value="firstNode" />
+
+    <!-- 日志文件存放地址 根地址 -->
+    <property name="BASE_PATH" value="/opt/log/${MODULE}" />
+
+    <!-- -->
+    <!-- 定义不同级别类型的日志的存放地址 ， 不过info日志中包含了error, 单独列出error 是为了在更少的日志中快速查看 error级别的日志 -->
+    <property name="INFO_FILE" value="${BASE_PATH}/info" />
+    <property name="ERROR_FILE" value="${BASE_PATH}/error" />
+
+
+    <!-- LOG_PATTERN 定义日志格式 -->
+    <!-- uuid 需要自己加入到 MDC 中去， MDC是logback提供的一种在线程中存放日志相关记录的map对象。
+    <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %X{remoteAddr} %X{hostname} [%thread] %-5level %logger{50} %X{uuid} - %msg%n" />
+    -->
+    <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %X{remoteAddr} %X{hostname} [%thread] %-5level %logger{50} %X{uuid} - %msg%n" />
+    <!-- 定义日志的字符集 -->
+    <property name="CHARSET" value="utf8" />
+
+    <!-- 输出文件日志时使用 单个文件最大大小 -->
+    <property name="MAX_FILE_SIZE" value="50MB" />
+    <!-- 输出文件日志时使用 单个文件最大大小 -->
+    <property name="MAX_HISTORY" value="60" />
+    <!-- 输出文件日志时使用 单个文件最大大小 -->
+    <property name="TOTAL_SIZE_CAP" value="20GB" />
+    <!-- 输出文件日志时使用 单个文件最大大小 -->
+    <property name="ROLL_FILE_PATTERN" value="%d{yyyy-MM-dd}-%i.log.gz" />
+
+
+    <!-- console appender-->
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${LOG_PATTERN}</pattern>
+            <charset>${CHARSET}</charset>
+        </encoder>
+    </appender>
+
+
+    <!-- 基于时间的滚动(归档)策略配置的 文件日志追加器  -->
+    <appender name="infoFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${LOG_PATTERN}</pattern>
+            <charset>${CHARSET}</charset>
+        </encoder>
+        <file>${INFO_FILE}.log</file>
+
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${INFO_FILE}/${ROLL_FILE_PATTERN}</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>${MAX_FILE_SIZE}</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+    </appender>
+
+    <!-- error log appender-->
+    <appender name="errorFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${LOG_PATTERN}</pattern>
+            <charset>${CHARSET}</charset>
+        </encoder>
+        <file>${ERROR_FILE}.log</file>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${ERROR_FILE}/${ROLL_FILE_PATTERN}</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>${MAX_FILE_SIZE}</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+    </appender>
+
+
+    <!-- root标签 特指 root名称的Logger 级根记录器 level属性表示：该记录器 允许打印的日志级别
+                         根记录器的级别默认是debug 级别，如果一个记录器logger没有设置 levele 会继承父级记录器的 level-->
+    <root level="INFO">
+        <appender-ref ref="console" />
+        <appender-ref ref="infoFile" />
+        <appender-ref ref="errorFile" />
+    </root>
+
+    <!-- 设置名称为 com.juqitech 的 记录器，
+      additivity 属性表示是否将 日志传递到父级记录器，让父级记录器继续打印，
+      一般没必要，因为如果当前这条日志的级别 父级记录器也允许打印，很出现多条同一日志；
+
+
+      此处为何定义多个 logger标签， 为了控制不同名称的logger的日志打印级别，以及输出目的地；
+
+      -->
+    <logger level="DEBUG" name="com.juqitech" additivity="false">
+        <appender-ref ref="console" />
+        <appender-ref ref="infoFile" />
+        <appender-ref ref="errorFile" />
+    </logger>
+
+    <logger level="DEBUG" name="commonlog" additivity="false">
+        <appender-ref ref="console" />
+        <appender-ref ref="infoFile" />
+        <appender-ref ref="errorFile" />
+    </logger>
+
+    <logger level="DEBUG" name="org.springframework.boot" additivity="false">
+        <appender-ref ref="infoFile" />
+        <appender-ref ref="console" />
+    </logger>
+
+    <logger level="DEBUG" name="org.springframework.web" additivity="false">
+        <appender-ref ref="infoFile" />
+        <appender-ref ref="console" />
+    </logger>
+
+    <logger level="DEBUG" name="org.springframework.cloud" additivity="false">
+        <appender-ref ref="infoFile" />
+        <appender-ref ref="console" />
+    </logger>
+
+    <logger level="INFO" name="com.netflix" additivity="false">
+        <appender-ref ref="infoFile" />
+        <appender-ref ref="console" />
+    </logger>
+
+
+</configuration>
+
